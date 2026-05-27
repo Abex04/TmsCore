@@ -1,20 +1,30 @@
 ﻿
-// Method that processes ANY gradable assessment through the IGradable contract
-// It doesn't know or care if it's a Quiz or LabAssignment — just calls the contract
-void PrintGradeReport(IEnumerable<IGradable> assessments)
+var service = new EnrollmentService();
+
+// Test 1: Valid registration
+var validStudent = new Student { Id = "S1", Name = "Abeba", Age = 20, GPA = 3.8m };
+var validCourse = new Course { Code = "CS-401", Title = "Advanced C#", Capacity = 30 };
+var result = service.ProcessRegistration(validStudent, validCourse);
+Console.WriteLine($"Enrolled: {result.StudentId} in {result.CourseCode}");
+
+// Test 2: Null student should throw
+try
 {
-	Console.WriteLine("--- Grade Report ---");
-	foreach (var item in assessments)
-	{
-		Console.WriteLine($"{item.Title}: {item.CalculateGrade():F2}%");
-	}
+    service.ProcessRegistration(null, validCourse);
+}
+catch (ArgumentNullException ex)
+{
+    Console.WriteLine($"Guard caught: {ex.ParamName}");
 }
 
-// One array holds two completely different assessment types
-// Both work because they both implement IGradable
-IGradable[] cohortAssessments = [
-	new Quiz { Title = "C# Basics", CorrectAnswers = 18, TotalQuestions = 20 },
-	new LabAssignment { Title = "Registration API", FunctionalityScore = 90m, CodeQualityScore = 85m }
-];
-
-PrintGradeReport(cohortAssessments);
+// Test 3: Full course should throw
+var fullCourse = new Course { Code = "CS-402", Title = "Full Course", Capacity = 1 };
+fullCourse.EnrolledCount = 1;
+try
+{
+    service.ProcessRegistration(validStudent, fullCourse);
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"Business rule: {ex.Message}");
+}
