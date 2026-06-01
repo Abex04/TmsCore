@@ -10,9 +10,9 @@ public class EnrollmentService
         // Guard clause 2: course must not be null
         if (course is null) throw new ArgumentNullException(nameof(course));
 
-        // Guard clause 3: course must not be full
+        // Guard clause 3: use our custom exception — carries the course code for better logging
         if (course.EnrolledCount >= course.Capacity)
-            throw new InvalidOperationException($"Course {course.Code} is full.");
+            throw new CapacityReachedException(course.Code);
 
         // Classify academic standing using a switch expression on GPA
         string standing = student.GPA switch
@@ -22,7 +22,7 @@ public class EnrollmentService
             _ => "Academic Warning"
         };
 
-        Console.WriteLine($"{student.Name} is in {standing}.");
+        Console.WriteLine($"  {student.Name} is in {standing}.");
 
         // Return a new immutable enrollment record
         return new EnrollmentRecord(student.Id, course.Code, DateTime.UtcNow);

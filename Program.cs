@@ -111,3 +111,49 @@ foreach (var student in students)
         Console.WriteLine($"  Rejected: {student.Name} — {ex.Message}");
     }
 }
+// --- Exercise 7: Custom Exceptions ---
+
+// Test catching CapacityReachedException — carries the course code for better logging
+try
+{
+    // Course is full — enrolled equals capacity
+    var overflowCourse = new Course { Code = "CRS-999", Title = "Overflow Test", Capacity = 1 };
+    overflowCourse.EnrolledCount = 1; // mark it as full
+    enrollService.ProcessRegistration(
+        new Student { Id = "S99", Name = "Test", Age = 20, GPA = 3.0m }, overflowCourse
+    );
+}
+catch (CapacityReachedException ex)
+{
+    Console.WriteLine($"\nDomain exception caught:");
+    Console.WriteLine($"  Course: {ex.CourseCode}");
+    Console.WriteLine($"  Message: {ex.Message}");
+}
+// --- Exercise 7B: Enrollment Summary Report ---
+
+// Stop the timer
+sw.Stop();
+
+// Calculate class average GPA from all loaded students
+decimal classAverage = students.Length > 0
+    ? students.Average(s => s.GPA)
+    : 0m;
+
+// Print the final report
+Console.WriteLine("\n========== ENROLLMENT SUMMARY ==========");
+Console.WriteLine($"Total students loaded:   {students.Length}");
+Console.WriteLine($"Successful enrollments:  {enrollments.Count}");
+Console.WriteLine($"Failed enrollments:      {failures.Count}");
+Console.WriteLine($"Class average GPA:       {classAverage:F2}");
+Console.WriteLine($"Total elapsed time:      {sw.ElapsedMilliseconds}ms");
+
+if (failures.Count > 0)
+{
+    Console.WriteLine("\n--- Failure Details ---");
+    foreach (var failure in failures)
+    {
+        Console.WriteLine($"  {failure}");
+    }
+}
+
+Console.WriteLine("========================================");
